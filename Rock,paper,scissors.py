@@ -1,39 +1,60 @@
 import random
+from enum import IntEnum
 
-user_wins = 0
-computer_wins = 0
 
-options = ["rock", "paper", "scissors"]
+class Action(IntEnum):
+    Rock = 0
+    Paper = 1
+    Scissors = 2
+    Lizard = 3
+    Spock = 4
+
+
+victories = {
+    Action.Scissors: [Action.Lizard, Action.Paper],
+    Action.Paper: [Action.Spock, Action.Rock],
+    Action.Rock: [Action.Lizard, Action.Scissors],
+    Action.Lizard: [Action.Spock, Action.Paper],
+    Action.Spock: [Action.Scissors, Action.Rock]
+}
+
+
+def get_user_selection():
+    choices = [f"{action.name}[{action.value}]" for action in Action]
+    choices_str = ", ".join(choices)
+    selection = int(input(f"Enter a choice ({choices_str}): "))
+    action = Action(selection)
+    return action
+
+
+def get_computer_selection():
+    selection = random.randint(0, len(Action) - 1)
+    action = Action(selection)
+    return action
+
+
+def determine_winner(user_action, computer_action):
+    defeats = victories[user_action]
+    if user_action == computer_action:
+        print(f"Both gamers choosing {user_action.name}. It's a tie!")
+    elif computer_action in defeats:
+        print(f"{user_action.name} beats {computer_action.name}! You winner!")
+    else:
+        print(f"{computer_action.name} beats {user_action.name}! You loser!.")
+
 
 while True:
-    user_input = input("Type rock/paper/scissors or q to quit: ").lower()
-    if user_input == "q":
-        break
-
-    if user_input not in options:
+    try:
+        user_action = get_user_selection()
+    except ValueError as e:
+        range_str = f"[0, {len(Action) - 1}]"
+        print(f"Invalid selection. Enter a value in range {range_str}")
         continue
 
-    random_number = random.randint(0, 2)
-    # rock is : 0, paper is: 1, scissors is: 2
-    computer_pick = options[random_number]
-    print("Computer picked", computer_pick + ".")
+    computer_action = get_computer_selection()
+    determine_winner(user_action, computer_action)
 
-    if user_input == "paper" and computer_pick == "rock":
-        print("You won !")
-        user_wins += 1
+    play_again = input("Do you want to play again? (y/n): ")
+    if play_again.lower() != "y":
+        break
 
-    elif user_input == "rock" and computer_pick == "scissors":
-        print("You won !")
-        user_wins += 1
-
-    elif user_input == "scissors" and computer_pick == "paper":
-        print("You won")
-        user_wins += 1
-
-    else:
-        print("You loser!")
-        computer_wins += 1
-
-print("You", user_wins, "Times")
-print("The computer won", computer_wins, "Times")
-print("Have a nice day !")
